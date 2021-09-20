@@ -14,6 +14,14 @@ class Turnos(Enum):
     JOGADOR_1 = 0
     JOGADOR_2 = 1
     
+    def next(self):
+        cls = self.__class__
+        members = list(cls)
+        index = members.index(self) + 1
+        if index >= len(members):
+            return members[0]
+        return members[index]
+    
 
 class Game:
     def __init__(self):
@@ -39,7 +47,9 @@ class Game:
                 
             if event.type == pygame.MOUSEBUTTONUP:
                 pos = pygame.mouse.get_pos()
-                peca.mover(pos)
+                moveu = peca.mover(pos)
+                if moveu:
+                    self.turno = Turnos.next()
                 
             self.draw()
             # self.mover(0,0)
