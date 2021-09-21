@@ -1,170 +1,116 @@
 import pygame
-from pygame.locals import *
+import os
 
-run = __name__ == '__main__'
+# --- constants --- (UPPER_CASE names)
+
+SCREEN_WIDTH = 430
+SCREEN_HEIGHT = 410
+
+#BLACK = (  0,   0,   0)
+WHITE = (255, 255, 255)
+RED   = (255,   0,   0)
+
+FPS = 30
+
+# --- classses --- (CamelCase names)
+
+# empty
+
+# --- functions --- (lower_case names)
+
+# empty
+
+# --- main ---ALTURA_BARREIRA = 20
+WIN_WIDTH, WIN_HEIGTH = 900, 900
+MARGEM = int(WIN_WIDTH * 0.1)
+TAMANHO_CASA = 60
+ALTURA_BARREIRA = 20
+LARGURA_BARREIRA = 140
+
+# BARREIRA_VERTICAL_FANTASMA = pygame.transform.scale(
+#     pygame.image.load(os.path.join("assets", "Barreira_v.png")),
+#     (ALTURA_BARREIRA, LARGURA_BARREIRA),
+# )
+BARREIRA_VERTICAL = pygame.transform.scale(
+    pygame.image.load(os.path.join("assets", "Barreira_v.png")),
+    (ALTURA_BARREIRA, LARGURA_BARREIRA),
+).convert_alpha()
+
+# BARREIRA_HORIZONTAL_FANTASMA = pygame.transform.scale(
+#     pygame.image.load(os.path.join("assets", "Barreira.png")),
+#     (LARGURA_BARREIRA, ALTURA_BARREIRA),
+# )
+BARREIRA_HORIZONTAL = pygame.transform.scale(
+    pygame.image.load(os.path.join("assets", "Barreira.png")),
+    (LARGURA_BARREIRA, ALTURA_BARREIRA),
+).convert_alpha()
+
+
+# - init -
+
+pygame.init()
+
+screen = pygame.display.set_mode((SCREEN_WIDTH, SCREEN_HEIGHT))
+#screen_rect = screen.get_rect()
+
+pygame.display.set_caption("Tracking System")
+
+# - objects -
+
+rectangle = BARREIRA_VERTICAL
+new_rect = BARREIRA_VERTICAL
+rectangle_draging = False
+
+# - mainloop -
+
 clock = pygame.time.Clock()
 
-#-----Options------
-WINDOW_SIZE = (1920, 1080) # (width, height) in pixels
-CELL_SIZE = 20 # in pixels
-FPS = 15 # number of generations per second
-#------------------
+running = True
 
-screen = pygame.display.set_mode(WINDOW_SIZE)
-display = pygame.Surface(WINDOW_SIZE)
+while running:
 
-cells = []
-setting_up = True
-lmousedown = False
-rmousedown = False
-show_grid = False
-columns = WINDOW_SIZE[0] // CELL_SIZE
-rows = WINDOW_SIZE[1] // CELL_SIZE
-
-# play_button_img = pygame.image.load('images/play_button.png').convert_alpha()
-# pause_button_img = pygame.image.load('images/pause_button.png').convert_alpha()
-
-class Cell():
-    def __init__(self, x, y, size):
-        self.x = x
-        self.y = y
-        self.size = size
-        self.living = False
-        self.x_coord = self.x // size
-        self.y_coord = self.y // size
-        self.rect = pygame.Rect(x, y, size, size)
-
-    def getNeighbors(self, cells):
-        # Translates the cells position in the 2d array in
-        # 8 directions to find the neighboring cells
-        neighbors = []
-        translate_directions = [
-            [0, 1],
-            [1, 0],
-            [0,-1],
-            [-1,0],
-            [1,-1],
-            [-1,1],
-            [1, 1],
-            [-1,-1],
-        ]
-        for translation in translate_directions:
-            x = self.x_coord + translation[0]
-            y = self.y_coord + translation[1]
-            # check if neighbor exists
-            if x < 0 or y < 0 or x >= len(cells[0]) or y >= len(cells):
-                continue
-            neighbors.append(cells[y][x])
-        return neighbors
-
-    def update(self):
-        living_neigbhors = 0
-        for neighbor in self.neighbors:
-            if neighbor.living:
-                living_neigbhors += 1
-
-        if self.living:
-            if living_neigbhors < 2:
-                self.lives_next_round = False
-            elif living_neigbhors > 3:
-                self.lives_next_round = False
-            else:
-                self.lives_next_round = True
-        else:
-            if living_neigbhors == 3:
-                self.lives_next_round = True
-            else:
-                self.lives_next_round = False
-        # Setting self.lives_next_round instead of self.living so that all cells can update their state at the same time
-
-    def draw(self, display):
-        if self.living:
-            pygame.draw.rect(display, (255, 255, 255), self.rect)
-        else:
-            if show_grid:
-                pygame.draw.rect(display, (150, 150, 150), self.rect, 1)
-
-# Creating cells and storing them in a 2d array
-for i in range(rows):
-    cells.append([Cell(j*CELL_SIZE, i*CELL_SIZE, CELL_SIZE) for j in range(columns)])
-
-# Once all cells are created, find all of their neighbors
-for row in cells:
-    for cell in row:
-        cell.neighbors = cell.getNeighbors(cells)
-
-def draw():
-    display.fill((50, 50, 50))
-
-    for row in cells:
-        for cell in row:
-            cell.draw(display)
-
-    # if setting_up:
-    #     display.blit(pause_button_img, (0, WINDOW_SIZE[1]-70))
-    # else:
-    #     display.blit(play_button_img, (0, WINDOW_SIZE[1]-70))
-
-    screen.blit(display, (0, 0))
-
-    pygame.display.update()
-
-while run:
-    if not setting_up:
-        clock.tick(FPS)
-
-    mx, my = pygame.mouse.get_pos()
+    # - events -
 
     for event in pygame.event.get():
-        if event.type == QUIT:
-            pygame.quit()
-        if event.type == KEYDOWN:
-            if event.key == K_g:
-                show_grid = not show_grid
+        if event.type == pygame.QUIT:
+            running = False
 
-        if setting_up:
-            if event.type == MOUSEBUTTONDOWN:
-                if event.button == 1:
-                    lmousedown = True
-                if event.button == 3:
-                    rmousedown = True
+        elif event.type == pygame.MOUSEBUTTONDOWN:
+            if event.button == 1:            
+                if rectangle.collidepoint(event.pos):
+                    rectangle_draging = True
+                    new_rect = BARREIRA_VERTICAL
+                    mouse_x, mouse_y = event.pos
+                    offset_x = new_rect.x - mouse_x
+                    offset_y = new_rect.y - mouse_y
 
-            if event.type == MOUSEBUTTONUP:
-                if event.button == 1:
-                    lmousedown = False
-                if event.button == 3:
-                    rmousedown = False                    
+        elif event.type == pygame.MOUSEBUTTONUP:
+            if event.button == 1:            
+                rectangle_draging = False
 
-            if event.type == KEYDOWN:
-                if event.key == K_SPACE:
-                    setting_up = False
-                if event.key == K_c:
-                    for row in cells:
-                        for cell in row:
-                            cell.living = False
+        elif event.type == pygame.MOUSEMOTION:
+            if rectangle_draging:
+                mouse_x, mouse_y = event.pos
+                new_rect.x = mouse_x + offset_x
+                new_rect.y = mouse_y + offset_y
 
-            if lmousedown:
-                try:
-                    cells[my//CELL_SIZE][mx//CELL_SIZE].living = True
-                except IndexError:
-                    pass
-            if rmousedown:
-                try:
-                    cells[my//CELL_SIZE][mx//CELL_SIZE].living = False
-                except IndexError:
-                    pass
-        else:
-            if event.type == KEYDOWN:
-                if event.key == K_SPACE:
-                    setting_up = True
+    # - updates (without draws) -
 
-    if not setting_up:
-        for row in cells:
-            for cell in row:
-                cell.update()
+    # empty
 
-        for row in cells:
-            for cell in row:
-                cell.living = cell.lives_next_round
+    # - draws (without updates) -
 
-    draw()
+    screen.fill(WHITE)
+
+    screen.blit(screen, RED, rectangle)
+    screen.blit(screen, RED, new_rect)
+
+    pygame.display.flip()
+
+    # - constant game speed / FPS -
+
+    clock.tick(FPS)
+
+# - end -
+
+pygame.quit()
