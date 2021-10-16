@@ -1,29 +1,11 @@
 from barreira import Barreira, OrientacaoBarreira
 import pygame
-import os
-from enum import Enum
-
-WIN_WIDTH, WIN_HEIGTH = 900, 900
-MARGEM = int(WIN_WIDTH*.1)
-TAMANHO_CASA = 60 
-TAMANHO_BARREIRA = 20
-
-PECA_VERMELHA = pygame.transform.scale(pygame.image.load(os.path.join("assets", "vermelha.png")), (TAMANHO_CASA, TAMANHO_CASA))
-PECA_AZUL = pygame.transform.scale(pygame.image.load(os.path.join("assets", "azul.png")), (TAMANHO_CASA, TAMANHO_CASA))
-
-VERMELHO = (255, 0, 0)
-AZUL = (0, 0, 255)
+from settings import *
 
 pecas = {'vermelha': PECA_VERMELHA, 'azul': PECA_AZUL}
 cores = {'vermelha': VERMELHO, 'azul': AZUL}
 jogadores = [(1,3), (4,8)]
 
-class Direcoes(Enum):
-    CIMA = 0
-    BAIXO = 1
-    DIREITA = 2
-    ESQUERDA = 3
-    
 class Peao:
     def __init__(self, cor: str, numero_jogador: int):
         self.numero_jogador = numero_jogador
@@ -59,14 +41,14 @@ class Peao:
     def desenhar_movimentos(self, win, pecas: list, barreiras: list[Barreira]):
         for movimento in self.movimentos_possiveis(pecas, barreiras):
             if not movimento: continue
-            pos_x = MARGEM + (TAMANHO_BARREIRA + TAMANHO_CASA)/2 + movimento[0] * (TAMANHO_CASA + TAMANHO_BARREIRA)
-            pos_y = MARGEM + (TAMANHO_BARREIRA + TAMANHO_CASA)/2 + movimento[1] * (TAMANHO_CASA + TAMANHO_BARREIRA)
-            pygame.draw.circle(win, self.cor, (pos_x, pos_y), 10)
+            pos_x = MARGEM + (ALTURA_BARREIRA + TAMANHO_CASA)/2 + movimento[0] * (TAMANHO_CASA + ALTURA_BARREIRA)
+            pos_y = MARGEM + (ALTURA_BARREIRA + TAMANHO_CASA)/2 + movimento[1] * (TAMANHO_CASA + ALTURA_BARREIRA)
+            pygame.draw.circle(win, self.cor, (pos_x, pos_y), 7)
     
     def mover(self, pos: tuple, pecas, barreiras: list[Barreira]):
         # convertendo posição do mouse para coordenada no tabuleiro
-        casa_x = (pos[0] - MARGEM) // (TAMANHO_BARREIRA + TAMANHO_CASA)
-        casa_y = (pos[1] - MARGEM) // (TAMANHO_BARREIRA + TAMANHO_CASA)
+        casa_x = (pos[0] - MARGEM) // (ALTURA_BARREIRA + TAMANHO_CASA)
+        casa_y = (pos[1] - MARGEM) // (ALTURA_BARREIRA + TAMANHO_CASA)
         
         if not 0 <= casa_x <= 8 or not 0 <= casa_y <= 8:
             return
@@ -96,9 +78,9 @@ class Peao:
                 self.barreiras['h'].append((barreira.x, barreira.y))
     
     def verificar_casa(self, direcao: Direcoes, casa):
-        casa = self.verificar_casa_vazia(direcao, casa) 
         # print(1, casa)  
         casa = self.verificar_barreira(direcao, casa)   
+        casa = self.verificar_casa_vazia(direcao, casa) 
         # print(2, casa)  
         return casa
         
@@ -131,8 +113,8 @@ class Peao:
         return casa
         
 def transform_coord(coord: tuple) -> tuple:
-    pos_x = MARGEM + TAMANHO_BARREIRA/2 + coord[0] * (TAMANHO_CASA + TAMANHO_BARREIRA)
-    pos_y = MARGEM + TAMANHO_BARREIRA/2 + coord[1] * (TAMANHO_CASA + TAMANHO_BARREIRA)
+    pos_x = MARGEM + ALTURA_BARREIRA/2 + coord[0] * (TAMANHO_CASA + ALTURA_BARREIRA)
+    pos_y = MARGEM + ALTURA_BARREIRA/2 + coord[1] * (TAMANHO_CASA + ALTURA_BARREIRA)
     return (pos_x, pos_y)
 
 
